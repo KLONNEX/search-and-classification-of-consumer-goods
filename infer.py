@@ -29,18 +29,17 @@ def train_loop():
     """
     Model training pipeline.
     """
-    data = pd.read_csv('../data/goods_classifier/test.csv')
+    data = pd.read_csv('../data/goods_classifier/test_dataset_test.csv')
     BATCH_SIZE = 128
 
-
     model = BertForSequenceClassification.from_pretrained(
-            "DeepPavlov/rubert-base-cased",
-            num_labels=9,
-            output_attentions=False,
-            output_hidden_states=False,
-        )
+        "DeepPavlov/rubert-base-cased",
+        num_labels=9,
+        output_attentions=False,
+        output_hidden_states=False,
+    )
 
-    weights = torch.load('logs/models/radam/model_epoch_0.pt')
+    weights = torch.load('logs/models/warmup_schedule/model_epoch_9.pt')
 
     weights = {key.replace('module.', ''): value for key, value in weights.items()}
 
@@ -81,7 +80,6 @@ def train_loop():
 
     with Path('../data/goods_classifier/test_output.pickle').open('wb') as file:
         pickle.dump(all_preds, file)
-
 
 
 if __name__ == "__main__":

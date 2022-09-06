@@ -5,9 +5,10 @@ from transformers import AutoTokenizer
 
 
 class ClassificationDataset:
-    def __init__(self, dataframe):
+    def __init__(self, dataframe, model_config, max_pad_len):
         translate_label = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 6: 5, 7: 6, 9: 7, 10: 8}
-        self.tokenizer = AutoTokenizer.from_pretrained("DeepPavlov/rubert-base-cased", do_lower_case=True)
+        self.max_len = max_pad_len
+        self.tokenizer = AutoTokenizer.from_pretrained(model_config, do_lower_case=True)
 
         self.labels = [translate_label[label] for label in dataframe['groups']]
         self.tokens = [self.get_token(text) for text in tqdm(dataframe['name'], total=len(dataframe))]
@@ -16,7 +17,7 @@ class ClassificationDataset:
         tokens = self.tokenizer(
             text,
             padding='max_length',
-            max_length=128,
+            max_length=self.max_len,
             truncation=True,
             return_tensors="pt"
         )

@@ -1,0 +1,24 @@
+# model
+model_config: 'DeepPavlov/rubert-base-cased'
+num_classes: 9
+
+# hyperparameters of training
+weight_decay: 1e-6
+learning_rate: 5e-4
+backbone_lr_div: 100
+epochs: 10
+batch_size: 32
+warmup_steps: 1000
+
+# other
+max_pad_len: 128
+
+# data ang logging
+data_path: '/root/path/to/dataset/JDE'
+ckpt_url: '/path/to/checkpoint'
+logs_dir: 'logs'
+num_workers: 16
+
+---
+# Config description for each option
+
