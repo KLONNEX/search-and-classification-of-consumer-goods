@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -13,9 +15,25 @@ class ClassificationDataset:
         self.labels = [translate_label[label] for label in dataframe['groups']]
         self.tokens = [self.get_token(text) for text in tqdm(dataframe['name'], total=len(dataframe))]
 
+    @staticmethod
+    def regular_clear(text):
+        text = text.lower()
+        without_extra = text.replace('/', ' ').replace(':', ' ')
+        without_brackets = re.sub('[\(\[].*?[\)\]]', '', without_extra)
+        without_quoted_text = re.sub('".*?"', '', without_brackets)
+        without_quoted_text = re.sub("'.*?'", '', without_quoted_text)
+        without_latin = re.sub(r'[a-zA-Z_]', r'', without_quoted_text)
+        without_double_spaces = re.sub("\s\s+", " ", without_latin)
+
+        without_long_digits = ' '.join([line_piece for line_piece in without_double_spaces.split(' ') if
+                                        not (line_piece.isdigit() and len(line_piece) > 3)])
+
+        return without_long_digits.strip()
+
     def get_token(self, text):
+        clear_text = self.regular_clear(text)
         tokens = self.tokenizer(
-            text,
+            clear_text,
             padding='max_length',
             max_length=self.max_len,
             truncation=True,

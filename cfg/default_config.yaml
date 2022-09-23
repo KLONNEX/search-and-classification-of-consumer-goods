@@ -3,20 +3,22 @@ model_config: 'DeepPavlov/rubert-base-cased'
 num_classes: 9
 
 # hyperparameters of training
-weight_decay: 1e-6
-learning_rate: 5e-4
+weight_decay: 0.000001
+learning_rate: 0.00005
 backbone_lr_div: 100
 epochs: 10
-batch_size: 32
-warmup_steps: 1000
+batch_size: 128
+warmup_steps: 5000
 
 # other
 max_pad_len: 128
 
 # data ang logging
-data_path: '/root/path/to/dataset/JDE'
+train_data_path: '../data/goods_classifier/train.csv'
+eval_data_path: '../data/goods_classifier/test.csv'
 ckpt_url: '/path/to/checkpoint'
 logs_dir: 'logs'
+exp_name: 'bs_128_wrmp_sch'
 num_workers: 16
 
 ---

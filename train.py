@@ -17,6 +17,7 @@ from transformers import BertForSequenceClassification
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 np.random.seed(42)
+torch.manual_seed(1)
 
 
 def worker_init_fn(worker_id):
@@ -33,13 +34,13 @@ def train_loop():
     """
     Model training pipeline.
     """
-    tb_logger_save_path = Path(config.logs_dir, 'tb_logger')
-    checkpoint_save_path = Path(config.logs_dir, 'checkpoints')
+    tb_logger_save_path = Path(config.logs_dir, 'tb_logger', config.exp_name)
+    checkpoint_save_path = Path(config.logs_dir, 'checkpoints', config.exp_name)
     tb_logger_save_path.mkdir(parents=True, exist_ok=True)
     checkpoint_save_path.mkdir(parents=True, exist_ok=True)
 
     tb_logger = SummaryWriter(log_dir=str(tb_logger_save_path), comment='Training writer.')
-    train_data = pd.read_csv(config.data_path)
+    train_data = pd.read_csv(config.train_data_path)
 
     model = BertForSequenceClassification.from_pretrained(
             config.model_config,
@@ -86,12 +87,12 @@ def train_loop():
             global_step = epoch * len(train_dataloader) + step
 
             if global_step < config.warmup_steps:
-                learning_rate = learning_rate * (step / config.warmup_steps) ** 4
+                lr = learning_rate * (step / config.warmup_steps) ** 4
                 for param_lr in optimizer.param_groups:
                     if param_lr['name'] == 'backbone':
-                        param_lr['lr'] = learning_rate / config.backbone_lr_div
+                        param_lr['lr'] = lr / config.backbone_lr_div
                     elif param_lr['name'] == 'head':
-                        param_lr['lr'] = learning_rate
+                        param_lr['lr'] = lr
 
             train_label = train_label.cuda()
             mask = train_input['attention_mask'].cuda()
@@ -127,7 +128,7 @@ def train_loop():
                 global_step=global_step,
             )
 
-        torch.save(model.state_dict(), f'logs/models/no_warmup_schedule/model_epoch_{epoch}.pt')
+        torch.save(model.state_dict(), f'{checkpoint_save_path}/model_epoch_{epoch}.pt')
 
 
 if __name__ == "__main__":
